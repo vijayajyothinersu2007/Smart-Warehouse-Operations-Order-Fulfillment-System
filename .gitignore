@@ -1,0 +1,24 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Pytest & Testing caches
+.pytest_cache/
+CACHEDIR.TAG
+
+# Database & local data files
+data/warehouse.db
+*.db
+*.sqlite3
+
+# Environment variables & secrets
+.env
+.venv/
+env/
+venv/
+ENV/
+
+# IDE specific settings
+.vscode/
+.idea/
