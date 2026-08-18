@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WarehouseIQ - Smart Operations & Decision Engine</title>
+  <meta name="description" content="Autonomous Smart Warehouse Operations & Order Fulfillment System with Explainable AI Decision Engine.">
+  
+  <!-- Modern Industrial Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="/static/css/main.css">
+  <link rel="stylesheet" href="/static/css/components.css">
+
+  <!-- Chart.js for Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div id="app-container">
+  
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="brand-logo-icon">IQ</div>
+      <div class="brand-title">WarehouseIQ</div>
+      <span class="brand-badge">MVP</span>
+    </div>
+
+    <div class="nav-section-title">Operations Control</div>
+    <ul class="nav-menu">
+      <li>
+        <a class="nav-item active" data-tab="dashboard" id="nav-dashboard">
+          <span class="nav-icon">📊</span>
+          <span>Command Center</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-item" data-tab="orders" id="nav-orders">
+          <span class="nav-icon">📑</span>
+          <span>Orders & Allocation</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-item" data-tab="inventory" id="nav-inventory">
+          <span class="nav-icon">📦</span>
+          <span>Inventory & Bins</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-item" data-tab="fulfillment" id="nav-fulfillment">
+          <span class="nav-icon">🚚</span>
+          <span>Fulfillment Pipeline</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-item" data-tab="exceptions" id="nav-exceptions">
+          <span class="nav-icon">⚠️</span>
+          <span>Exceptions Hub</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-item" data-tab="analytics" id="nav-analytics">
+          <span class="nav-icon">📈</span>
+          <span>Analytics & Insights</span>
+        </a>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <div class="system-status-indicator">
+        <div class="status-dot"></div>
+        <div>
+          <div style="font-weight:600; color:var(--text-primary);">Decision Engine Active</div>
+          <div style="font-size:0.7rem; color:var(--text-muted);">Autonomous Allocation: Online</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Wrapper -->
+  <div class="main-wrapper">
+    
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="page-header-info">
+        <h1 id="topbar-title">Operational Command Center</h1>
+        <p id="topbar-desc">Real-time throughput, fulfillment health, and explainable autonomous decisions.</p>
+      </div>
+
+      <div class="topbar-actions">
+        <button class="btn btn-secondary btn-sm" onclick="App.resetDemoData()" title="Reset database to hackathon demo state">
+          🔄 Reset Demo
+        </button>
+        <button class="btn btn-decision btn-sm" onclick="OrdersView.runAllocationAll()" title="Execute stock allocation on all pending orders">
+          ⚡ Auto-Allocate
+        </button>
+        <button class="btn btn-primary btn-sm" onclick="OrdersView.openNewOrderModal()" title="Create a new test order">
+          ➕ New Order
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="content-area">
+
+      <!-- ========================================================================= -->
+      <!-- 1. COMMAND CENTER (DASHBOARD) VIEW -->
+      <!-- ========================================================================= -->
+      <section id="view-dashboard" class="view-panel active">
+        
+        <!-- Mandatory Stock Contention Scenario Demo Callout -->
+        <div class="scenario-banner">
+          <div class="scenario-info">
+            <h3>⚡ Stock Contention Scenario (Order A vs Order B)</h3>
+            <p>
+              <strong>Order A (VIP/Urgent)</strong> requires 10 units of <code>SKU-DRONE-4K</code>. 
+              <strong>Order B (Normal)</strong> requires 5 units. 
+              Only <strong>7 units</strong> are available in stock. Click to run the intelligent allocation trade-off.
+            </p>
+          </div>
+          <button class="btn btn-decision" onclick="DashboardView.triggerContentionDemo()">
+            🧪 Run Contention Demo
+          </button>
+        </div>
+
+        <!-- KPI Grid (8 metrics) -->
+        <div class="kpi-grid">
+          <div class="kpi-card highlight">
+            <div class="kpi-header">
+              <span class="kpi-title">Total Orders</span>
+              <span class="kpi-icon-badge">📋</span>
+            </div>
+            <div class="kpi-value" id="kpi-total-orders">-</div>
+            <div class="kpi-subtitle">Active order queue</div>
+          </div>
+
+          <div class="kpi-card warning">
+            <div class="kpi-header">
+              <span class="kpi-title">Pending Allocation</span>
+              <span class="kpi-icon-badge">⏳</span>
+            </div>
+            <div class="kpi-value" id="kpi-pending-orders">-</div>
+            <div class="kpi-subtitle">Awaiting stock lock</div>
+          </div>
+
+          <div class="kpi-card highlight">
+            <div class="kpi-header">
+              <span class="kpi-title">In Picking</span>
+              <span class="kpi-icon-badge">📦</span>
+            </div>
+            <div class="kpi-value" id="kpi-picking-orders">-</div>
+            <div class="kpi-subtitle">Active floor pick tasks</div>
+          </div>
+
+          <div class="kpi-card success">
+            <div class="kpi-header">
+              <span class="kpi-title">Ready for Dispatch</span>
+              <span class="kpi-icon-badge">🚚</span>
+            </div>
+            <div class="kpi-value" id="kpi-dispatch-orders">-</div>
+            <div class="kpi-subtitle">Packed & QC verified</div>
+          </div>
+
+          <div class="kpi-card warning">
+            <div class="kpi-header">
+              <span class="kpi-title">Low Stock SKUs</span>
+              <span class="kpi-icon-badge">⚠️</span>
+            </div>
+            <div class="kpi-value" id="kpi-low-stock">-</div>
+            <div class="kpi-subtitle">Below reorder point</div>
+          </div>
+
+          <div class="kpi-card danger">
+            <div class="kpi-header">
+              <span class="kpi-title">Out of Stock</span>
+              <span class="kpi-icon-badge">🛑</span>
+            </div>
+            <div class="kpi-value" id="kpi-out-stock">-</div>
+            <div class="kpi-subtitle">Zero available units</div>
+          </div>
+
+          <div class="kpi-card danger">
+            <div class="kpi-header">
+              <span class="kpi-title">Open Exceptions</span>
+              <span class="kpi-icon-badge">🚨</span>
+            </div>
+            <div class="kpi-value" id="kpi-open-exceptions">-</div>
+            <div class="kpi-subtitle">Damaged/missing stock</div>
+          </div>
+
+          <div class="kpi-card success">
+            <div class="kpi-header">
+              <span class="kpi-title">Fulfillment Rate</span>
+              <span class="kpi-icon-badge">🎯</span>
+            </div>
+            <div class="kpi-value" id="kpi-fulfillment-rate">-%</div>
+            <div class="kpi-subtitle">Dispatched / Total</div>
+          </div>
+        </div>
+
+        <!-- Recent Autonomous Decisions Stream -->
+        <div class="surface-card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">🤖 Live Autonomous Decisions Feed</div>
+              <div class="card-subtitle">Every allocation trade-off and exception triage decision is explained and auditable.</div>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="DashboardView.render()">
+              🔄 Refresh Feed
+            </button>
+          </div>
+
+          <div id="dashboard-decision-feed" class="decision-feed">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- 2. ORDERS & ALLOCATION VIEW -->
+      <!-- ========================================================================= -->
+      <section id="view-orders" class="view-panel">
+        <div class="surface-card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">📑 Order Prioritization & Allocation Queue</div>
+              <div class="card-subtitle">Orders ranked dynamically by SLA urgency countdown, VIP customer tier, and stock readiness.</div>
+            </div>
+            <div style="display:flex; gap:0.5rem;">
+              <button class="btn btn-secondary btn-sm" onclick="OrdersView.recalculatePriorities()">
+                ⏱️ Recalculate Priorities
+              </button>
+              <button class="btn btn-decision btn-sm" onclick="OrdersView.runAllocationAll()">
+                ⚡ Run Autonomous Allocation
+              </button>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Priority Score</th>
+                  <th>Customer & Tier</th>
+                  <th>Required / Allocated Items</th>
+                  <th>Fulfillment Status</th>
+                  <th>SLA Deadline</th>
+                  <th>Allocation Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="orders-table-body">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- 3. INVENTORY & BINS VIEW -->
+      <!-- ========================================================================= -->
+      <section id="view-inventory" class="view-panel">
+        <div class="surface-card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">📦 Real-time Warehouse Inventory & Stock Levels</div>
+              <div class="card-subtitle">Bin-level on-hand counts, soft-locked allocations, damaged quarantine, and safety stock.</div>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="InventoryView.render()">
+              🔄 Refresh Inventory
+            </button>
+          </div>
+
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>SKU / Barcode</th>
+                  <th>Product & Category</th>
+                  <th>Available Stock</th>
+                  <th>Reserved Stock</th>
+                  <th>Damaged Stock</th>
+                  <th>Reorder Point</th>
+                  <th>Stock Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="inventory-table-body">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- 4. FULFILLMENT PIPELINE VIEW -->
+      <!-- ========================================================================= -->
+      <section id="view-fulfillment" class="view-panel">
+        <div class="surface-card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">🚚 End-to-End Fulfillment Pipeline</div>
+              <div class="card-subtitle">Track orders from Stock Allocation through Floor Picking, Packing, QC Verification, to Carrier Handover.</div>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="FulfillmentView.render()">
+              🔄 Refresh Board
+            </button>
+          </div>
+
+          <div class="kanban-board">
+            
+            <!-- Allocated Column -->
+            <div class="kanban-column">
+              <div class="kanban-column-header">
+                <div class="kanban-column-title"><span>🔒 Allocated</span></div>
+                <span class="kanban-count" id="kanban-count-allocated">0</span>
+              </div>
+              <div id="kanban-allocated" class="kanban-cards"></div>
+            </div>
+
+            <!-- Picking Column -->
+            <div class="kanban-column">
+              <div class="kanban-column-header">
+                <div class="kanban-column-title"><span>🛒 Picking</span></div>
+                <span class="kanban-count" id="kanban-count-picking">0</span>
+              </div>
+              <div id="kanban-picking" class="kanban-cards"></div>
+            </div>
+
+            <!-- Packed Column -->
+            <div class="kanban-column">
+              <div class="kanban-column-header">
+                <div class="kanban-column-title"><span>📦 Packed</span></div>
+                <span class="kanban-count" id="kanban-count-packed">0</span>
+              </div>
+              <div id="kanban-packed" class="kanban-cards"></div>
+            </div>
+
+            <!-- QC Passed Column -->
+            <div class="kanban-column">
+              <div class="kanban-column-header">
+                <div class="kanban-column-title"><span>✅ QC Passed</span></div>
+                <span class="kanban-count" id="kanban-count-qc_passed">0</span>
+              </div>
+              <div id="kanban-qc_passed" class="kanban-cards"></div>
+            </div>
+
+            <!-- Dispatched Column -->
+            <div class="kanban-column">
+              <div class="kanban-column-header">
+                <div class="kanban-column-title"><span>🚚 Dispatched</span></div>
+                <span class="kanban-count" id="kanban-count-dispatched">0</span>
+              </div>
+              <div id="kanban-dispatched" class="kanban-cards"></div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- 5. EXCEPTIONS & DISCREPANCIES VIEW -->
+      <!-- ========================================================================= -->
+      <section id="view-exceptions" class="view-panel">
+        <div class="surface-card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">⚠️ Operational Exceptions & Discrepancy Hub</div>
+              <div class="card-subtitle">Autonomous triage and automated corrective actions for damaged items, missing stock, and shortages.</div>
+            </div>
+            <div style="display:flex; gap:0.5rem;">
+              <button class="btn btn-secondary btn-sm" onclick="ExceptionsView.openDamagedModal()">
+                🛑 Report Damaged Item
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="ExceptionsView.openMissingModal()">
+                ❓ Report Missing Stock
+              </button>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Exception ID</th>
+                  <th>Type & Severity</th>
+                  <th>Product & Bin</th>
+                  <th>Description & Resolution</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="exceptions-table-body">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- 6. ANALYTICS & BOTTLENECK INSIGHTS VIEW -->
+      <!-- ========================================================================= -->
+      <section id="view-analytics" class="view-panel">
+        <div class="kpi-grid">
+          <div class="kpi-card highlight">
+            <div class="kpi-header"><span class="kpi-title">Fulfillment Rate</span></div>
+            <div class="kpi-value" id="analytics-fulfillment-rate">-</div>
+            <div class="kpi-subtitle">Dispatched / Total Volume</div>
+          </div>
+          <div class="kpi-card highlight">
+            <div class="kpi-header"><span class="kpi-title">Avg Fulfillment Time</span></div>
+            <div class="kpi-value" id="analytics-avg-time">-</div>
+            <div class="kpi-subtitle">Ingestion to Dispatch</div>
+          </div>
+          <div class="kpi-card success">
+            <div class="kpi-header"><span class="kpi-title">SLA On-Time Rate</span></div>
+            <div class="kpi-value" id="analytics-sla-health">-</div>
+            <div class="kpi-subtitle">No SLA breaches</div>
+          </div>
+          <div class="kpi-card danger">
+            <div class="kpi-header"><span class="kpi-title">Open Exceptions</span></div>
+            <div class="kpi-value" id="analytics-total-exceptions">-</div>
+            <div class="kpi-subtitle">Requiring triage</div>
+          </div>
+        </div>
+
+        <div class="two-col-grid">
+          <div class="surface-card">
+            <div class="card-title" style="margin-bottom:1rem;">📊 Order Status Distribution</div>
+            <div style="height: 280px; position: relative;">
+              <canvas id="chart-order-status"></canvas>
+            </div>
+          </div>
+
+          <div class="surface-card">
+            <div class="card-title" style="margin-bottom:1rem;">🏢 Warehouse Zone Stock Distribution</div>
+            <div style="height: 280px; position: relative;">
+              <canvas id="chart-zone-stock"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODALS -->
+<!-- ========================================================================= -->
+
+<!-- 1. Explainable Decision Modal -->
+<div id="decision-modal-backdrop" class="modal-backdrop">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="modal-decision-title">Autonomous Decision</h3>
+      <button class="modal-close" id="decision-modal-close">&times;</button>
+    </div>
+    
+    <div class="modal-body">
+      
+      <div class="decision-detail-section" style="display:flex; justify-content:space-between; align-items:center;">
+        <span class="badge badge-urgent" id="modal-decision-action" style="font-size:0.85rem; padding:4px 10px;">ACTION_NAME</span>
+        <span class="badge badge-passed" id="modal-decision-confidence">95% Confidence</span>
+      </div>
+
+      <div class="decision-detail-section">
+        <div class="decision-detail-title">Natural Language Rationale</div>
+        <div class="decision-rationale-box" id="modal-decision-rationale">
+          Loading rationale...
+        </div>
+      </div>
+
+      <div class="decision-detail-section">
+        <div class="decision-detail-title">Mathematical Factors & Inputs Evaluated</div>
+        <div class="factors-grid" id="modal-decision-factors">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <div class="decision-detail-section">
+        <div class="decision-detail-title">System Recommended Action</div>
+        <div style="background-color:rgba(37,99,235,0.1); border:1px solid rgba(37,99,235,0.3); border-radius:var(--radius-sm); padding:0.85rem; font-size:0.85rem; color:#93C5FD;" id="modal-decision-recommendation">
+          Recommended action details...
+        </div>
+      </div>
+
+      <div class="decision-detail-section">
+        <div class="decision-detail-title">Alternatives Considered & Rejection Rationale</div>
+        <div class="alternatives-list" id="modal-decision-alternatives">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-primary" id="decision-modal-ok">Acknowledge Decision</button>
+    </div>
+  </div>
+</div>
+
+<!-- 2. Create Order Modal -->
+<div id="new-order-modal-backdrop" class="modal-backdrop">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>➕ Create New Fulfillment Order</h3>
+      <button class="modal-close" onclick="OrdersView.closeNewOrderModal()">&times;</button>
+    </div>
+    <form id="new-order-form">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Customer / Client Name</label>
+          <input type="text" id="new-order-customer" class="form-control" value="Sierra Dynamics Corp" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Customer Tier / Urgency</label>
+          <select id="new-order-tier" class="form-control">
+            <option value="URGENT">URGENT (Critical VIP - 100 Base Score)</option>
+            <option value="VIP">VIP Partner (95 Base Score)</option>
+            <option value="EXPRESS">Express Priority (75 Base Score)</option>
+            <option value="NORMAL" selected>Normal / Standard B2C (45 Base Score)</option>
+            <option value="BULK">Bulk / Economy (25 Base Score)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Target SKU</label>
+          <select id="new-order-sku" class="form-control">
+            <option value="SKU-DRONE-4K">SKU-DRONE-4K: Industrial Inspection Drone 4K ($899)</option>
+            <option value="SKU-ELEC-01">SKU-ELEC-01: Lithium Power Station 500W ($450)</option>
+            <option value="SKU-ELEC-02">SKU-ELEC-02: Wireless Rugged Barcode Scanner ($140)</option>
+            <option value="SKU-APPR-01">SKU-APPR-01: Hi-Vis Thermal Warehouse Parka ($75)</option>
+            <option value="SKU-HARD-01">SKU-HARD-01: Heavy Duty Pallet Strapping Kit ($45)</option>
+            <option value="SKU-PERI-01">SKU-PERI-01: Cold-Chain Diagnostic Serum Kit ($320)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Quantity Requested</label>
+          <input type="number" id="new-order-qty" class="form-control" value="5" min="1" max="100" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">SLA Target Cutoff (Hours from now)</label>
+          <input type="number" id="new-order-sla" class="form-control" value="6.0" step="0.5" min="0.5" max="72" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="OrdersView.closeNewOrderModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Create Order</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 3. Adjust Stock Modal -->
+<div id="adjust-stock-modal-backdrop" class="modal-backdrop">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>⚙️ Quick Stock Adjustment</h3>
+      <button class="modal-close" onclick="InventoryView.closeAdjustModal()">&times;</button>
+    </div>
+    <form id="adjust-stock-form">
+      <div class="modal-body">
+        <input type="hidden" id="adjust-sku">
+        <div class="form-group">
+          <label class="form-label">Target Product</label>
+          <div id="adjust-sku-display" style="font-weight:700; color:#93C5FD;"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Select Bin Location</label>
+          <select id="adjust-bin-select" class="form-control" required></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">New Physical On-Hand Quantity</label>
+          <input type="number" id="adjust-qty" class="form-control" value="25" min="0" max="500" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="InventoryView.closeAdjustModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Update Stock</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 4. Report Damaged Item Modal -->
+<div id="report-damaged-modal-backdrop" class="modal-backdrop">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>🛑 Report Damaged Item in Bin</h3>
+      <button class="modal-close" onclick="ExceptionsView.closeDamagedModal()">&times;</button>
+    </div>
+    <form id="report-damaged-form">
+      <div class="modal-body">
+        <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:1rem;">
+          Reporting damaged units will automatically quarantine the stock, discover alternate bins, and trigger real-time picker re-routing.
+        </p>
+        <div class="form-group">
+          <label class="form-label">Damaged Product SKU</label>
+          <select id="damaged-sku-select" class="form-control" required></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Bin Location</label>
+          <select id="damaged-bin-select" class="form-control" required></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Damaged Quantity</label>
+          <input type="number" id="damaged-qty" class="form-control" value="2" min="1" max="50" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="ExceptionsView.closeDamagedModal()">Cancel</button>
+        <button type="submit" class="btn btn-danger">Quarantine & Auto-Reroute</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 5. Report Missing Item Modal -->
+<div id="report-missing-modal-backdrop" class="modal-backdrop">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>❓ Report Missing Stock (Empty Bin)</h3>
+      <button class="modal-close" onclick="ExceptionsView.closeMissingModal()">&times;</button>
+    </div>
+    <form id="report-missing-form">
+      <div class="modal-body">
+        <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:1rem;">
+          Reporting a missing item will immediately zero-out the bin's physical on-hand count in the database and trigger an emergency cycle-count discrepancy audit.
+        </p>
+        <div class="form-group">
+          <label class="form-label">Missing Product SKU</label>
+          <select id="missing-sku-select" class="form-control" required></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Bin Location Found Empty</label>
+          <select id="missing-bin-select" class="form-control" required></select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="ExceptionsView.closeMissingModal()">Cancel</button>
+        <button type="submit" class="btn btn-danger">Zero Bin & Log Audit</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="/static/js/api_client.js"></script>
+<script src="/static/js/components/notification_toast.js"></script>
+<script src="/static/js/components/decision_modal.js"></script>
+<script src="/static/js/views/dashboard_view.js"></script>
+<script src="/static/js/views/orders_view.js"></script>
+<script src="/static/js/views/inventory_view.js"></script>
+<script src="/static/js/views/fulfillment_view.js"></script>
+<script src="/static/js/views/exceptions_view.js"></script>
+<script src="/static/js/views/analytics_view.js"></script>
+<script src="/static/js/app.js"></script>
+
+</body>
+</html>
