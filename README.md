@@ -1,11 +1,11 @@
 # WarehouseIQ 🚀
-### Smart Warehouse Operations & Autonomous Decision Engine (Phase 1 MVP)
+### Smart Warehouse Operations & Autonomous Decision Engine
 
 WarehouseIQ is an intelligent warehouse operations and order fulfillment platform designed to replace passive transactional WMS systems with an **Explainable Autonomous Decision Engine**.
 
 ---
 
-## 🌟 Key Features in Phase 1 MVP
+## 🌟 Key Features in MVP
 
 1. **Autonomous Stock Contention Resolver**:
    - Intelligently evaluates trade-offs when stock demand exceeds on-hand units (e.g. Urgent VIP Order vs Normal Order).
@@ -58,7 +58,6 @@ pytest tests/ -v
 
 ---
 
-## 🎯 Hackathon Demo Walkthrough (Stock Contention Scenario)
 
 1. Open **Command Center** (`http://127.0.0.1:5000`).
 2. Notice the top banner: **"Stock Contention Scenario (Order A vs Order B)"**.
@@ -114,8 +113,3 @@ smart-warehouse/
 
 ---
 
-## 🔮 Roadmap for Phase 2
-
-- **Advanced 2D Warehouse Spatial Pick Routing**: Interactive Canvas rendering of S-Shape serpentine traversal and Manhattan distance calculations.
-- **Predictive EOQ & Dynamic Safety Stock**: Automated Purchase Order generation based on lead times and demand variability.
-- **Station Bottleneck Heatmap**: Real-time queue-to-throughput ratio tracking and automated picker load-balancing.
